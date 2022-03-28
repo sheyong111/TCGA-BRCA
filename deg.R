@@ -17,17 +17,7 @@ a <- read.delim2("combined_RNA_Expr.txt", row.names = 1)
 dim(a)
 a[0:4,1:4]
 
-#####gene id 转换
-gtf <- rtracklayer::import('Homo_sapiens.GRCh38.105.chr.gtf.gz')
-#转化为数据框
-gtf <- as.data.frame(gtf)
-#查看文件，保存文件为Rdata，将来方便我们直接打开
-dim(gtf)
-#save(gtf,file = "Homo_sapiens.GRCh38.105基因组注释文件.Rda")
-colnames(counts[1]) <- 'gene_id'
-a=dplyr::filter(gtf,type=="gene",gene_biotype=="protein_coding")
-dim(a)
-#只选择gene_name，gene_id和gene_biotype这三列
+
 
 
 

@@ -43,14 +43,14 @@ dim(mRNAdata)
 rownames(mRNAdata)<- mRNAdata[,1]#将第一列作为行名
 mRNAdata<-mRNAdata[,-1]#去掉第一列
 save(mRNAdata,file = "result/mRNAdata.Rda")
-write.csv(mRNAdata,"result2/mRNAdata.csv",quote = F,row.names = T)
+write.csv(mRNAdata,"result/mRNAdata.csv",quote = F,row.names = T)
 
 
 
 rm(list = ls())
 exprSet <- load(file = "result/mRNAdata.Rda")
 exprSet <- mRNAdata
-exprSet <- read.table(file = "result2/mRNAdata.csv", header = T, row.names = 1, sep = "," )
+exprSet <- read.table(file = "result/mRNAdata.csv", header = T, row.names = 1, sep = "," )
 # exprSet <- read.csv("result2/mRNAdata.csv")
 # dim(exprSet)
 # exprSet[1:4,1:4]
@@ -114,10 +114,7 @@ head(resOrdered)
 resOrdered=as.data.frame(resOrdered)#把resOrdered变成数据框，
 DEG <- na.omit(resOrdered)
 
-#暂时保存一下
-write.csv(DEG, file="result2/DESeq.csv", quote = F, row.names = T)#保存差异分析结果文件
 
-DEG <- read.csv(file = "result2/DESeq.csv")
 #DEG里添加一列名为change列，标记基因上调下调:
 #sd()为数字函数，意为标准差。abs() 也是数字函数，意为绝对值。mean函数是求算数平均值。
 #Mean+2*sd可以反应95%以上观测值，比较可信。
@@ -134,9 +131,7 @@ DEG$change = as.factor(
 head(DEG)
 table(DEG$change)
 DESeq2_DEG <- DEG
-#write.table(resOrdered, file="result/DEG.xls", sep="\t",quote=F)
 write.csv(DEG, file="result2/DESeq_DEG.csv", quote = F, row.names = T)
-
 
 
 
@@ -162,7 +157,6 @@ DEG2$change = as.factor(
 head(DEG2)
 table(DEG2$change)
 edgeR_DEG <- DEG2
-#write.table(edgeR_DEG, file="result2/edgeR_DEG.xls", sep="\t",quote=F)
 write.csv(edgeR_DEG, file="result2/edgeR_DEG.csv", quote = F, row.names = T)
 
 
@@ -194,8 +188,10 @@ table(DEG3$change)
 limma_voom_DEG <- DEG3
 write.csv(limma_voom_DEG, file="result2/limma_voom_DEG.csv", quote = F, row.names = T)
 write.csv(limma_voom_DEG, file="result2/limma_voom_DEG.csv", quote = F, row.names = T)
-#save(DESeq2_DEG,edgeR_DEG,file = "DEG.Rdata")
-edgeR_DEG[1:4,1:4]
+
+
+save(DESeq2_DEG,edgeR_DEG,limma_voom_DEG,group_list,file = "result/DEG.Rdata")
+
 
 
 ###################热图########################################
@@ -252,9 +248,6 @@ DESeq2_DEG[1:4,1:4]
 ##header =T 将数据的第一行作为标题。row.names = 1 第一列为行名
 edgeR_DEG <- read.table(file = "result2/edgeR_DEG.csv", header = T, row.names = 1, sep = ",")
 
-edgeR_DEG[1:4,1:4]
-limma_voom_DEG[1:4,1:4]
-
 EnhancedVolcano(DESeq2_DEG,
                 lab = rownames(DESeq2_DEG),
                 x = 'log2FoldChange',
@@ -265,15 +258,6 @@ EnhancedVolcano(DESeq2_DEG,
                 FCcutoff = 2.5,
                 
                 )
-
-
-EnhancedVolcano(edgeR_DEG,
-                      lab = rownames(edgeR_DEG),
-                      x = 'logFC',
-                      y = 'PValue',
-                      xlim = c(-8,8),
-                      )
-
 
 
 #############三大R包差异基因对比##########
@@ -298,15 +282,13 @@ up.plot <- venn(UP(DESeq2_DEG),UP(edgeR_DEG),UP(limma_voom_DEG),
 down.plot <- venn(DOWN(DESeq2_DEG),DOWN(edgeR_DEG),DOWN(limma_voom_DEG),
                   "DOWNgene"
 )
-#维恩图拼图，终于搞定
-
+#维恩图拼图
 library(cowplot)
 library(ggplotify)
 up.plot = as.ggplot(as_grob(up.plot))
 down.plot = as.ggplot(as_grob(down.plot))
 library(patchwork)
 #up.plot + down.plot
-# 就爱玩拼图
 pca.plot + hp+up.plot +down.plot
 ggsave("deg.png",height = 10,width = 10)
 
